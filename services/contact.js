@@ -33,8 +33,16 @@ const getContactById = async (id) => {
   }
 };
 
-const removeContact = (id) => {
-  return Contact.findByIdAndDelete(id);
+const removeContact = async (id) => {
+  try {
+    const result = await Contact.findByIdAndDelete(id);
+    return result;
+  } catch (error) {
+    if (error.message.includes("Cast to ObjectId failed")) {
+      return null;
+    }
+    throw new Error();
+  }
 };
 
 const updateStatusContact = async (id, body) => {
