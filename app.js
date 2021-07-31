@@ -1,25 +1,45 @@
-const express = require('express')
-const logger = require('morgan')
-const cors = require('cors')
+//web server
+const express = require("express");
+const logger = require("morgan");
+const cors = require("cors");
+const app = express();
+const formatsLogger = app.get("env") === "development" ? "dev" : "short";
+const api = require("./routes/api");
 
-const contactsRouter = require('./routes/api/contacts')
+app.use(logger(formatsLogger));
+app.use(cors());
+app.use(express.json());
+app.use("/api/contacts", api.contacts);
 
-const app = express()
+app.use((_, res) => {
+  res.status(404).json({
+    status: "error",
+    code: 404,
+    message: "Not found",
+  });
+});
 
-const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
+app.use((error, _, res, __) => {
+  const { code = 500, message = "server error" } = error;
+  res.status(code).json({
+    status: "fail",
+    code,
+    message,
+  });
+});
 
-app.use(logger(formatsLogger))
-app.use(cors())
-app.use(express.json())
+// database
+const mongoose = require("mongoose");
+require("dotenv").config();
 
-app.use('/api/contacts', contactsRouter)
+const { DB_HOST } = process.env;
 
-app.use((req, res) => {
-  res.status(404).json({ message: 'Not found' })
-})
+mongoose
+  .connect(DB_HOST, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("db connect"))
+  .catch((error) => console.log(error));
 
-app.use((err, req, res, next) => {
-  res.status(500).json({ message: err.message })
-})
-
-module.exports = app
+module.exports = app;
