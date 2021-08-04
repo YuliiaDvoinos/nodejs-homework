@@ -5,6 +5,7 @@ const cors = require("cors");
 const app = express();
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 const api = require("./routes/api");
+require("./configs/passport-config");
 
 app.use(logger(formatsLogger));
 app.use(cors());
