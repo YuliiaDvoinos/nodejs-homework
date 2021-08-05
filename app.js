@@ -5,12 +5,13 @@ const cors = require("cors");
 const app = express();
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 const api = require("./routes/api");
+require("./configs/passport-config");
 
 app.use(logger(formatsLogger));
 app.use(cors());
 app.use(express.json());
 app.use("/api/contacts", api.contacts);
-
+app.use("/api/auth", api.auth);
 app.use((_, res) => {
   res.status(404).json({
     status: "error",
